@@ -1,24 +1,39 @@
 import { DeployFunction } from "hardhat-deploy/types";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
+import fs from "fs";
 
-const DAY_IN_SECONDS = 60 * 60 * 24;
-const NOW_IN_SECONDS = Math.round(Date.now() / 1000);
-const UNLOCK_IN_X_DAYS = NOW_IN_SECONDS + DAY_IN_SECONDS * 1; // 1 DAY
-
-const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
-  const { deployer } = await hre.getNamedAccounts();
+const deployContracts: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const { deploy } = hre.deployments;
-  const lockedAmount = hre.ethers.parseEther("0.01").toString();
+  const [deployerSigner] = await hre.ethers.getSigners();
+  const deployer = await deployerSigner.getAddress();
 
-  const lock = await deploy("Lock", {
-    from: deployer,
-    args: [UNLOCK_IN_X_DAYS],
-    log: true,
-    value: lockedAmount,
-  });
+  console.log("\x1B[37mDeploying ERC20Token contract");
 
-  console.log(`Lock contract: `, lock.address);
+  // Deploy ERC20Token contract
+  await (async function deployERC20Token() {
+
+    const erc20token = await deploy("ERC20Token", {
+      from: deployer,
+      log: true,
+    });
+
+    const erc20tokenBlock = await hre.ethers.provider.getBlock("latest");
+
+    console.log(`\nERC20Token contract deployed at: `, erc20token.address);
+
+    // Save to contracts.out file
+    const erc20tokenDeployStr = `ERC20Token contract deployed at: ${erc20token.address} - Block number: ${erc20tokenBlock?.number}\n`;
+    fs.appendFileSync("contracts.out", erc20tokenDeployStr);
+
+    // Verify ERC20Token contract
+    const erc20tokenVerifyStr = `npx hardhat verify --network ${hre.network.name} ${erc20token.address}\n`;
+    console.log(erc20tokenVerifyStr);
+    fs.appendFileSync("contracts.out", erc20tokenVerifyStr);
+  })();
+
 };
-export default func;
-func.id = "deploy_lock"; // id required to prevent reexecution
-func.tags = ["Lock"];
+
+deployContracts.id = "erc20_token";
+deployContracts.tags = ["ERC20Token"];
+
+export default deployContracts;

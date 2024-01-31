@@ -2,25 +2,25 @@
 
 pragma solidity ^0.8.20;
 
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Permit.sol";
-import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Votes.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Permit.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Votes.sol";
 
 /**
- * @title MyToken
- * @dev A mock token contract that extends ERC20, Ownable, ERC20Permit, and ERC20Votes.
+ * @title MockERC721
+ * @dev A mock token contract that extends ERC721, Ownable, ERC721Permit, and ERC721Votes.
  * This will be using in testing.
  */
-contract MyToken is ERC20, Ownable, ERC20Permit, ERC20Votes {
+contract MockERC721 is ERC721, Ownable, ERC721Permit, ERC721Votes {
     /**
-     * @dev Initializes the MyToken contract.
+     * @dev Initializes the MockERC721 contract.
      * @param initialOwner The initial owner of the contract.
      */
     constructor(address initialOwner)
-        ERC20("MyToken", "MTK")
+        ERC721("MockERC721", "MTK")
         Ownable(initialOwner)
-        ERC20Permit("MyToken")
+        ERC721Permit("MockERC721")
     {}
 
     /**
@@ -34,27 +34,27 @@ contract MyToken is ERC20, Ownable, ERC20Permit, ERC20Votes {
     }
 
     /**
-     * @dev Overrides the _update function from ERC20Votes to update the voting power of the specified addresses.
+     * @dev Overrides the _update function from ERC721Votes to update the voting power of the specified addresses.
      * @param from The address from which tokens are transferred.
      * @param to The address to which tokens are transferred.
      * @param value The amount of tokens transferred.
      */
     function _update(address from, address to, uint256 value)
         internal
-        override(ERC20, ERC20Votes)
+        override(ERC721, ERC721Votes)
     {
         super._update(from, to, value);
     }
 
     /**
-     * @dev Overrides the nonces function from ERC20Permit to get the nonce of the specified owner.
+     * @dev Overrides the nonces function from ERC721Permit to get the nonce of the specified owner.
      * @param owner The address of the owner.
      * @return The nonce of the owner.
      */
     function nonces(address owner)
         public
         view
-        override(ERC20Permit, Nonces)
+        override(ERC721Permit, Nonces)
         returns (uint256)
     {
         return super.nonces(owner);
